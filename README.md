@@ -1,11 +1,10 @@
-# - albadaa rp
-<!DOCTYPE html>
+# albadaa RP
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>AlBadaa RP - التقديم</title>
+<title>AlBadaa RP - نظام التوظيف</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
@@ -53,8 +52,9 @@ font-weight:bold;
 cursor:pointer;
 }
 
-button:hover{
-background:#6d28d9;
+button:disabled{
+background:#333;
+cursor:not-allowed;
 }
 
 input,textarea{
@@ -65,6 +65,7 @@ border-radius:8px;
 border:none;
 background:#0b0d12;
 color:white;
+outline:none;
 }
 
 .box{
@@ -85,26 +86,29 @@ border:1px solid #a78bfa;
 
 .hidden{display:none;}
 
+.small{font-size:12px;opacity:0.7;}
+
 </style>
 </head>
 
 <body>
 
 <header>
-🏛️ AlBadaa RP - التقديم الرسمي
-<div style="font-size:12px;opacity:0.7;margin-top:5px;">
-👑 المسؤول: RV
-</div>
+🏛️ AlBadaa RP - نظام التوظيف
+<div class="small">👑 المسؤول: RV</div>
 </header>
 
 <div class="container">
 
+<!-- تسجيل دخول -->
 <div class="card">
 <button onclick="login()">تسجيل دخول Discord</button>
+<p class="small">الدخول يتم حفظه تلقائيًا</p>
 </div>
 
+<!-- القطاعات -->
 <div class="card">
-<h3>اختر الجهة</h3>
+<h3>اختر القطاع</h3>
 
 <div class="box" onclick="selectDept(this,'وزارة الداخلية')">وزارة الداخلية</div>
 <div class="box" onclick="selectDept(this,'وزارة الدفاع')">وزارة الدفاع</div>
@@ -115,6 +119,7 @@ border:1px solid #a78bfa;
 
 </div>
 
+<!-- التقديم -->
 <div class="card">
 
 <input id="name" placeholder="الاسم">
@@ -124,99 +129,191 @@ border:1px solid #a78bfa;
 <textarea id="exp" placeholder="الخبرات"></textarea>
 <input id="hours" placeholder="ساعات التواجد">
 
-<button onclick="send()">إرسال الطلب</button>
+<button id="sendBtn" onclick="send()" disabled>إرسال الطلب</button>
 
 <p id="msg"></p>
 
+</div>
+
+<!-- لوحة المسؤول -->
+<div class="card hidden" id="adminPanel">
+<h3>👑 لوحة المسؤول</h3>
+<div id="apps"></div>
 </div>
 
 </div>
 
 <script>
 
-/* ================= FIREBASE ================= */
+/* 🔥 Firebase */
 const firebaseConfig = {
-apiKey: "YOUR_KEY",
-authDomain: "YOUR_DOMAIN",
-projectId: "YOUR_ID"
+apiKey:"YOUR_KEY",
+authDomain:"YOUR_DOMAIN",
+projectId:"YOUR_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.firestore();
 
-/* ================= بيانات ================= */
-let dept="";
-let userApplied=false;
+/* 🔔 Discord Webhook */
+const WEBHOOK="YOUR_DISCORD_WEBHOOK";
 
-/* ================= تسجيل دخول وهمي (مؤقت) ================= */
-/* لأن Discord OAuth يحتاج سيرفر */
+/* 👑 المسؤولين */
+const ADMIN_IDS=[
+"1274697642533978184"
+];
+
+let dept="";
+let applied=false;
+let logged=false;
+
+/* 🔐 تسجيل دخول (محفوظ) */
 function login(){
 localStorage.setItem("logged","true");
-alert("تم تسجيل الدخول (محاكاة)");
+logged=true;
+alert("تم تسجيل الدخول ✔");
 }
 
-/* ================= اختيار القطاع ================= */
+/* 🔄 استرجاع الحالة */
+window.onload=()=>{
+if(localStorage.getItem("logged")){
+logged=true;
+}
+
+if(localStorage.getItem("applied")){
+applied=true;
+document.getElementById("msg").innerText="لقد قدمت مسبقاً";
+}
+}
+
+/* 🎯 اختيار قطاع */
 function selectDept(el,name){
 
-if(userApplied){
-alert("لا يمكنك اختيار قطاع بعد التقديم");
-return;
-}
+if(applied) return;
 
 dept=name;
 
-// إزالة اللون من الكل
 document.querySelectorAll(".box").forEach(b=>{
 b.classList.remove("active");
 });
 
-// تلوين المختار
 el.classList.add("active");
+
+checkForm();
+}
+
+/* 🧠 تحقق ذكي */
+function checkForm(){
+
+if(applied) return;
+
+let name=document.getElementById("name").value.trim();
+let age=document.getElementById("age").value.trim();
+let discord=document.getElementById("discord").value.trim();
+let gameId=document.getElementById("gameId").value.trim();
+let exp=document.getElementById("exp").value.trim();
+let hours=document.getElementById("hours").value.trim();
+
+document.getElementById("sendBtn").disabled=
+!(name && age && discord && gameId && exp && hours && dept);
 
 }
 
-/* ================= إرسال طلب ================= */
+/* 📩 إرسال */
 async function send(){
 
-if(userApplied){
-alert("لقد قدمت مسبقاً ❌");
+if(!logged){
+alert("سجل دخول أول");
 return;
 }
 
-if(!dept){
-alert("اختر القطاع أولاً");
+if(applied){
+alert("❌ قدمت مسبقاً");
+return;
+}
+
+let name=document.getElementById("name").value.trim();
+let age=document.getElementById("age").value.trim();
+let discord=document.getElementById("discord").value.trim();
+let gameId=document.getElementById("gameId").value.trim();
+let exp=document.getElementById("exp").value.trim();
+let hours=document.getElementById("hours").value.trim();
+
+if(!name || !age || !discord || !gameId || !exp || !hours || !dept){
+alert("❌ أكمل البيانات");
 return;
 }
 
 let data={
-name:document.getElementById("name").value,
-age:document.getElementById("age").value,
-discord:document.getElementById("discord").value,
-gameId:document.getElementById("gameId").value,
-exp:document.getElementById("exp").value,
-hours:document.getElementById("hours").value,
-dept:dept,
+name,age,discord,gameId,exp,hours,dept,
 status:"pending"
 };
 
 await db.collection("applications").add(data);
 
 /* قفل التقديم */
-userApplied=true;
+applied=true;
 localStorage.setItem("applied","true");
 
 document.getElementById("msg").innerText="✔ تم إرسال الطلب بنجاح";
 
+document.getElementById("sendBtn").disabled=true;
+
+/* Discord */
+fetch(WEBHOOK,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+content:`📩 طلب جديد
+👤 ${name}
+🏛️ ${dept}
+🎮 ${gameId}
+💬 ${discord}`
+})
+});
+
 }
 
-/* ================= منع التكرار ================= */
-window.onload=()=>{
-if(localStorage.getItem("applied")){
-userApplied=true;
-document.getElementById("msg").innerText="لقد قدمت مسبقاً";
+/* 👑 لوحة المسؤول */
+async function loadAdmin(){
+
+let snap=await db.collection("applications").get();
+
+let html="";
+
+snap.forEach(doc=>{
+
+let d=doc.data();
+
+html+=`
+<div class="card">
+<p>👤 ${d.name}</p>
+<p>🏛️ ${d.dept}</p>
+<p>📊 ${d.status}</p>
+
+<button onclick="accept('${doc.id}')">✔ قبول</button>
+<button onclick="reject('${doc.id}')">✖ رفض</button>
+</div>
+`;
+});
+
+document.getElementById("apps").innerHTML=html;
+
 }
+
+/* ✔ قبول */
+function accept(id){
+db.collection("applications").doc(id).update({status:"accepted"});
+loadAdmin();
 }
+
+/* ✖ رفض */
+function reject(id){
+db.collection("applications").doc(id).update({status:"rejected"});
+loadAdmin();
+}
+
+loadAdmin();
 
 </script>
 
