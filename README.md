@@ -102,7 +102,7 @@ border-radius:8px;
 <body>
 
 <header>
-🏛️ Velora RP PRO MAX
+🏛️ Velora RP 
 <div style="font-size:12px;opacity:0.7;">نظام التوظيف الاحترافي</div>
 </header>
 
