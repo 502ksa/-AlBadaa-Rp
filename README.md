@@ -1,9 +1,9 @@
-#VELORA RP
+# AlBadaa Rp
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Velora RP - </title>
+<title>AlBadaa Rp - </title>
 
 <style>
 
@@ -102,7 +102,7 @@ border-radius:8px;
 <body>
 
 <header>
-🏛️ Velora RP 
+🏛️ AlBadaa Rp
 <div style="font-size:12px;opacity:0.7;">نظام التوظيف الاحترافي</div>
 </header>
 
