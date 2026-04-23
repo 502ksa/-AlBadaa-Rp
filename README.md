@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>AlBadaa RP - التوظيف</title>
+<title>velora RP - التوظيف</title>
 
 <style>
 
