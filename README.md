@@ -3,18 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Velora RP</title>
+<title>Velora RP - PRO MAX</title>
 
 <style>
 
-*{box-sizing:border-box;}
+*{
+box-sizing:border-box;
+}
 
 body{
 margin:0;
-font-family:tahoma;
+font-family:Tahoma, Arial;
 background:#0f1116;
 color:white;
+unicode-bidi:plaintext;
+direction:rtl;
 }
 
 header{
@@ -25,7 +28,7 @@ border-bottom:2px solid #6d28d9;
 }
 
 .container{
-max-width:750px;
+max-width:850px;
 margin:auto;
 padding:15px;
 }
@@ -46,7 +49,7 @@ border:none;
 border-radius:8px;
 background:#0b0d12;
 color:white;
-outline:none;
+font-family:inherit;
 }
 
 button{
@@ -68,6 +71,7 @@ margin:5px 0;
 border-radius:8px;
 text-align:center;
 cursor:pointer;
+transition:0.2s;
 }
 
 .box.active{
@@ -76,21 +80,37 @@ background:#6d28d9;
 
 .hidden{display:none;}
 
+.copy{
+background:#374151;
+margin-top:5px;
+font-size:12px;
+padding:8px;
+}
+
+hr{opacity:0.2;}
+
+pre{
+white-space:pre-wrap;
+background:#0b0d12;
+padding:10px;
+border-radius:8px;
+}
+
 </style>
 </head>
 
 <body>
 
 <header>
-🏛️ Velora RP
-<div style="font-size:12px;opacity:0.8;">نظام التوظيف الرسمي</div>
-<div style="font-size:11px;opacity:0.6;">👑 الإدارة: RV</div>
+🏛️ Velora RP PRO MAX
+<div style="font-size:12px;opacity:0.7;">نظام التوظيف الاحترافي</div>
 </header>
 
 <div class="container">
 
-<!-- تقديم -->
+<!-- التقديم -->
 <div class="card">
+
 <h3>📄 التقديم</h3>
 
 <input id="name" placeholder="الاسم">
@@ -100,22 +120,26 @@ background:#6d28d9;
 <textarea id="exp" placeholder="الخبرات"></textarea>
 <input id="hours" placeholder="ساعات التواجد">
 
-<div class="box" onclick="selectDept(this,'وزارة الداخلية')">وزارة الداخلية</div>
-<div class="box" onclick="selectDept(this,'وزارة الدفاع')">وزارة الدفاع</div>
-<div class="box" onclick="selectDept(this,'وزارة الصحة')">وزارة الصحة</div>
-<div class="box" onclick="selectDept(this,'وزارة العدل')">وزارة العدل</div>
-<div class="box" onclick="selectDept(this,'قوات الطوارئ')">قوات الطوارئ</div>
-<div class="box" onclick="selectDept(this,'أمن الدولة')">أمن الدولة</div>
+<div class="box" onclick="pick(this,'الداخلية')">الداخلية</div>
+<div class="box" onclick="pick(this,'الدفاع')">الدفاع</div>
+<div class="box" onclick="pick(this,'الصحة')">الصحة</div>
+<div class="box" onclick="pick(this,'العدل')">العدل</div>
+<div class="box" onclick="pick(this,'الطوارئ')">الطوارئ</div>
+<div class="box" onclick="pick(this,'أمن الدولة')">أمن الدولة</div>
 
 <button onclick="send()">إرسال الطلب</button>
 
 <p id="msg"></p>
+
 </div>
 
 <!-- لوحة المسؤول -->
 <div class="card">
-<button onclick="openAdmin()">🔐 لوحة المسؤول</button>
-<div id="adminPanel" class="hidden"></div>
+
+<button onclick="adminLogin()">🔐 لوحة المسؤول</button>
+
+<div id="panel" class="hidden"></div>
+
 </div>
 
 </div>
@@ -126,7 +150,7 @@ let dept="";
 let applied=false;
 
 /* اختيار قطاع */
-function selectDept(el,name){
+function pick(el,name){
 dept=name;
 document.querySelectorAll(".box").forEach(b=>b.classList.remove("active"));
 el.classList.add("active");
@@ -134,11 +158,6 @@ el.classList.add("active");
 
 /* إرسال */
 function send(){
-
-if(applied){
-alert("❌ قدمت مسبقاً");
-return;
-}
 
 let data={
 name:name.value,
@@ -152,7 +171,12 @@ status:"pending"
 };
 
 if(!data.name || !data.age || !data.discord || !data.game || !data.exp || !data.hours || !dept){
-alert("عبي كل البيانات + اختر قطاع");
+alert("❌ عبي كل البيانات واختر القطاع");
+return;
+}
+
+if(applied){
+alert("❌ قدمت مسبقًا");
 return;
 }
 
@@ -161,27 +185,27 @@ arr.push(data);
 localStorage.setItem("apps",JSON.stringify(arr));
 
 applied=true;
+msg.innerText="✔ تم إرسال الطلب";
 
-msg.innerText="✔ تم إرسال الطلب بنجاح";
 }
 
-/* لوحة المسؤول */
-function openAdmin(){
+/* دخول المسؤول */
+function adminLogin(){
 
-let pass=prompt("ادخل الباسورد");
+let pass=prompt("🔐 ادخل الباسورد");
 
 if(pass!="0008"){
 alert("❌ خطأ");
 return;
 }
 
-loadAdmin();
-document.getElementById("adminPanel").classList.remove("hidden");
+load();
+panel.classList.remove("hidden");
 
 }
 
 /* عرض الطلبات */
-function loadAdmin(){
+function load(){
 
 let arr=JSON.parse(localStorage.getItem("apps")||"[]");
 
@@ -191,21 +215,45 @@ arr.forEach((a,i)=>{
 
 html+=`
 <div class="card">
-<p>👤 الاسم: ${a.name}</p>
-<p>🎂 العمر: ${a.age}</p>
-<p>🎮 Game ID: ${a.game}</p>
-<p>💬 Discord: ${a.discord}</p>
-<p>🏛️ القطاع: ${a.dept}</p>
-<p>📊 الحالة: ${a.status}</p>
+
+<p><b>👤 الاسم:</b> ${a.name}</p>
+<button class="copy" onclick="copy('${a.name}')">نسخ الاسم</button>
+
+<p><b>🎂 العمر:</b> ${a.age}</p>
+<button class="copy" onclick="copy('${a.age}')">نسخ العمر</button>
+
+<p><b>💬 Discord:</b> ${a.discord}</p>
+<button class="copy" onclick="copy('${a.discord}')">نسخ ديسكورد</button>
+
+<p><b>🎮 Game ID:</b> ${a.game}</p>
+<button class="copy" onclick="copy('${a.game}')">نسخ Game ID</button>
+
+<p><b>🏛️ القطاع:</b> ${a.dept}</p>
+
+<p><b>📄 الخبرات:</b></p>
+<pre>${a.exp}</pre>
+<button class="copy" onclick="copy(\`${a.exp}\`)">نسخ الخبرات</button>
+
+<p><b>⏱ الساعات:</b> ${a.hours}</p>
+
+<p><b>📊 الحالة:</b> ${a.status}</p>
+
+<hr>
 
 <button onclick="accept(${i})">✔ قبول</button>
 <button onclick="reject(${i})">✖ رفض</button>
-<button onclick="copyDiscord('${a.discord}')">💬 نسخ ديسكورد</button>
+
 </div>
 `;
 });
 
-document.getElementById("adminPanel").innerHTML=html;
+panel.innerHTML=html;
+}
+
+/* نسخ */
+function copy(text){
+navigator.clipboard.writeText(text);
+alert("تم النسخ ✔");
 }
 
 /* قبول */
@@ -213,7 +261,7 @@ function accept(i){
 let arr=JSON.parse(localStorage.getItem("apps"));
 arr[i].status="accepted";
 localStorage.setItem("apps",JSON.stringify(arr));
-loadAdmin();
+load();
 }
 
 /* رفض */
@@ -221,13 +269,7 @@ function reject(i){
 let arr=JSON.parse(localStorage.getItem("apps"));
 arr[i].status="rejected";
 localStorage.setItem("apps",JSON.stringify(arr));
-loadAdmin();
-}
-
-/* نسخ ديسكورد */
-function copyDiscord(id){
-navigator.clipboard.writeText(id);
-alert("تم نسخ Discord ID");
+load();
 }
 
 </script>
