@@ -1,17 +1,41 @@
-# albadaa Rp
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>AlBadaa RP - التقديم الرسمي</title>
+<title>AlBadaa RP - التوظيف</title>
 
 <style>
+
+*{
+box-sizing:border-box;
+}
+
 body{
 margin:0;
 font-family:tahoma;
 background:#0f1116;
 color:white;
+}
+
+/* إصلاح مشكلة الضغط */
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:-1;
+}
+
+.container{
+position:relative;
+z-index:5;
+max-width:900px;
+margin:auto;
+padding:15px;
 }
 
 header{
@@ -22,18 +46,14 @@ font-weight:bold;
 border-bottom:2px solid #6d28d9;
 }
 
-.container{
-max-width:900px;
-margin:auto;
-padding:15px;
-}
-
 .card{
 background:#161a23;
 padding:15px;
 margin:10px 0;
 border-radius:10px;
 border:1px solid #22283a;
+position:relative;
+z-index:10;
 }
 
 button{
@@ -46,6 +66,9 @@ background:#5b21b6;
 color:white;
 font-weight:bold;
 cursor:pointer;
+position:relative;
+z-index:20;
+pointer-events:auto;
 }
 
 button:disabled{
@@ -72,6 +95,14 @@ text-align:center;
 cursor:pointer;
 border:1px solid #2a3145;
 transition:0.2s;
+user-select:none;
+position:relative;
+z-index:20;
+pointer-events:auto;
+}
+
+.box:hover{
+background:#232a3d;
 }
 
 .box.active{
@@ -81,7 +112,11 @@ border:1px solid #a78bfa;
 
 .hidden{display:none;}
 
-.small{font-size:12px;opacity:0.7;}
+.small{
+font-size:12px;
+opacity:0.7;
+}
+
 </style>
 </head>
 
@@ -96,7 +131,7 @@ border:1px solid #a78bfa;
 
 <div class="card">
 <button onclick="login()">تسجيل دخول</button>
-<p class="small">الدخول ينحفظ تلقائي</p>
+<p class="small">الدخول محفوظ تلقائي</p>
 </div>
 
 <div class="card">
@@ -150,7 +185,6 @@ alert("تم تسجيل الدخول ✔");
 window.onload=()=>{
 if(localStorage.getItem("login")) logged=true;
 if(localStorage.getItem("applied")) applied=true;
-
 load();
 };
 
