@@ -94,8 +94,8 @@ background:#6d28d9;
 <body>
 
 <header>
-🏛️ AlBadaa RP - التوظيف
-<div style="font-size:12px;">👑 المسؤول: RV</div>
+🏛️ velora RP - التوظيف
+<div style="font-size:12px;"> المسؤول: RV</div>
 </header>
 
 <div class="container">
