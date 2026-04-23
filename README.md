@@ -8,34 +8,13 @@
 
 <style>
 
-*{
-box-sizing:border-box;
-}
+*{box-sizing:border-box;}
 
 body{
 margin:0;
 font-family:tahoma;
 background:#0f1116;
 color:white;
-}
-
-/* إصلاح مشكلة الضغط */
-body::before{
-content:"";
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-z-index:-1;
-}
-
-.container{
-position:relative;
-z-index:5;
-max-width:900px;
-margin:auto;
-padding:15px;
 }
 
 header{
@@ -46,14 +25,18 @@ font-weight:bold;
 border-bottom:2px solid #6d28d9;
 }
 
+.container{
+max-width:900px;
+margin:auto;
+padding:15px;
+}
+
 .card{
 background:#161a23;
 padding:15px;
 margin:10px 0;
 border-radius:10px;
 border:1px solid #22283a;
-position:relative;
-z-index:10;
 }
 
 button{
@@ -66,9 +49,6 @@ background:#5b21b6;
 color:white;
 font-weight:bold;
 cursor:pointer;
-position:relative;
-z-index:20;
-pointer-events:auto;
 }
 
 button:disabled{
@@ -84,6 +64,11 @@ border-radius:8px;
 border:none;
 background:#0b0d12;
 color:white;
+outline:none;
+}
+
+input.error,textarea.error{
+border:1px solid red;
 }
 
 .box{
@@ -95,27 +80,13 @@ text-align:center;
 cursor:pointer;
 border:1px solid #2a3145;
 transition:0.2s;
-user-select:none;
-position:relative;
-z-index:20;
-pointer-events:auto;
-}
-
-.box:hover{
-background:#232a3d;
 }
 
 .box.active{
 background:#6d28d9;
-border:1px solid #a78bfa;
 }
 
 .hidden{display:none;}
-
-.small{
-font-size:12px;
-opacity:0.7;
-}
 
 </style>
 </head>
@@ -124,14 +95,14 @@ opacity:0.7;
 
 <header>
 🏛️ AlBadaa RP - التوظيف
-<div class="small">👑 المسؤول: RV</div>
+<div style="font-size:12px;">👑 المسؤول: RV</div>
 </header>
 
 <div class="container">
 
 <div class="card">
 <button onclick="login()">تسجيل دخول</button>
-<p class="small">الدخول محفوظ تلقائي</p>
+<button onclick="openAdmin()">لوحة المسؤول</button>
 </div>
 
 <div class="card">
@@ -170,6 +141,8 @@ opacity:0.7;
 
 <script>
 
+const ADMIN_PASSWORD = "123456"; // 🔐 غيره
+
 let dept="";
 let logged=false;
 let applied=false;
@@ -181,16 +154,28 @@ localStorage.setItem("login","1");
 alert("تم تسجيل الدخول ✔");
 }
 
+/* لوحة المسؤول */
+function openAdmin(){
+
+let pass=prompt("ادخل الرمز السري");
+
+if(pass===ADMIN_PASSWORD){
+admin.classList.remove("hidden");
+load();
+}else{
+alert("❌ رمز خاطئ");
+}
+
+}
+
 /* استرجاع */
 window.onload=()=>{
 if(localStorage.getItem("login")) logged=true;
 if(localStorage.getItem("applied")) applied=true;
-load();
 };
 
 /* اختيار */
 function selectDept(el,name){
-
 if(applied) return;
 
 dept=name;
@@ -201,24 +186,31 @@ el.classList.add("active");
 check();
 }
 
-/* تحقق */
+/* تحقق ذكي */
 function check(){
 
-let filled=
-name.value &&
-age.value &&
-discord.value &&
-gameId.value &&
-exp.value &&
-hours.value &&
-dept;
+let valid=true;
 
-sendBtn.disabled=!filled;
+let fields=["name","age","discord","gameId","exp","hours"];
+
+fields.forEach(id=>{
+let el=document.getElementById(id);
+if(!el.value.trim()){
+el.classList.add("error");
+valid=false;
+}else{
+el.classList.remove("error");
+}
+});
+
+if(!dept) valid=false;
+
+sendBtn.disabled=!valid;
 }
 
 /* مراقبة */
 document.querySelectorAll("input,textarea").forEach(i=>{
-i.oninput=check;
+i.addEventListener("input",check);
 });
 
 /* إرسال */
@@ -256,17 +248,12 @@ msg.innerText="✔ تم إرسال الطلب بنجاح";
 
 sendBtn.disabled=true;
 
-load();
 }
 
 /* لوحة المسؤول */
 function load(){
 
 let apps=JSON.parse(localStorage.getItem("apps")||"[]");
-
-if(logged){
-admin.classList.remove("hidden");
-}
 
 let html="";
 
@@ -276,7 +263,7 @@ html+=`
 <div class="card">
 <p>👤 ${a.name}</p>
 <p>🏛️ ${a.dept}</p>
-<p>📊 الحالة: ${a.status}</p>
+<p>📊 ${a.status}</p>
 
 <button onclick="accept(${i})">✔ قبول</button>
 <button onclick="reject(${i})">✖ رفض</button>
