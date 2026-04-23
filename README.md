@@ -1,10 +1,10 @@
-# velora RP
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>velora RP - التوظيف</title>
+<title>Velora RP</title>
 
 <style>
 
@@ -21,12 +21,11 @@ header{
 background:#141826;
 padding:18px;
 text-align:center;
-font-weight:bold;
 border-bottom:2px solid #6d28d9;
 }
 
 .container{
-max-width:900px;
+max-width:750px;
 margin:auto;
 padding:15px;
 }
@@ -37,6 +36,17 @@ padding:15px;
 margin:10px 0;
 border-radius:10px;
 border:1px solid #22283a;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:6px 0;
+border:none;
+border-radius:8px;
+background:#0b0d12;
+color:white;
+outline:none;
 }
 
 button{
@@ -51,35 +61,13 @@ font-weight:bold;
 cursor:pointer;
 }
 
-button:disabled{
-background:#333;
-cursor:not-allowed;
-}
-
-input,textarea{
-width:100%;
-padding:10px;
-margin:6px 0;
-border-radius:8px;
-border:none;
-background:#0b0d12;
-color:white;
-outline:none;
-}
-
-input.error,textarea.error{
-border:1px solid red;
-}
-
 .box{
 background:#1a1f2d;
-padding:12px;
-margin:6px 0;
+padding:10px;
+margin:5px 0;
 border-radius:8px;
 text-align:center;
 cursor:pointer;
-border:1px solid #2a3145;
-transition:0.2s;
 }
 
 .box.active{
@@ -94,19 +82,23 @@ background:#6d28d9;
 <body>
 
 <header>
-🏛️ velora RP - التوظيف
-<div style="font-size:12px;"> المسؤول: RV</div>
+🏛️ Velora RP
+<div style="font-size:12px;opacity:0.8;">نظام التوظيف الرسمي</div>
+<div style="font-size:11px;opacity:0.6;">👑 الإدارة: RV</div>
 </header>
 
 <div class="container">
 
+<!-- تقديم -->
 <div class="card">
-<button onclick="login()">تسجيل دخول</button>
-<button onclick="openAdmin()">لوحة المسؤول</button>
-</div>
+<h3>📄 التقديم</h3>
 
-<div class="card">
-<h3>اختر القطاع</h3>
+<input id="name" placeholder="الاسم">
+<input id="age" placeholder="العمر">
+<input id="discord" placeholder="Discord ID">
+<input id="game" placeholder="Game ID">
+<textarea id="exp" placeholder="الخبرات"></textarea>
+<input id="hours" placeholder="ساعات التواجد">
 
 <div class="box" onclick="selectDept(this,'وزارة الداخلية')">وزارة الداخلية</div>
 <div class="box" onclick="selectDept(this,'وزارة الدفاع')">وزارة الدفاع</div>
@@ -115,114 +107,36 @@ background:#6d28d9;
 <div class="box" onclick="selectDept(this,'قوات الطوارئ')">قوات الطوارئ</div>
 <div class="box" onclick="selectDept(this,'أمن الدولة')">أمن الدولة</div>
 
-</div>
-
-<div class="card">
-
-<input id="name" placeholder="الاسم">
-<input id="age" placeholder="العمر">
-<input id="discord" placeholder="Discord ID">
-<input id="gameId" placeholder="Game ID">
-<textarea id="exp" placeholder="الخبرات"></textarea>
-<input id="hours" placeholder="ساعات التواجد">
-
-<button id="sendBtn" onclick="send()" disabled>إرسال الطلب</button>
+<button onclick="send()">إرسال الطلب</button>
 
 <p id="msg"></p>
-
 </div>
 
-<div class="card hidden" id="admin">
-<h3>👑 لوحة المسؤول</h3>
-<div id="list"></div>
+<!-- لوحة المسؤول -->
+<div class="card">
+<button onclick="openAdmin()">🔐 لوحة المسؤول</button>
+<div id="adminPanel" class="hidden"></div>
 </div>
 
 </div>
 
 <script>
 
-const ADMIN_PASSWORD = "123456"; // 🔐 غيره
-
 let dept="";
-let logged=false;
 let applied=false;
 
-/* تسجيل */
-function login(){
-logged=true;
-localStorage.setItem("login","1");
-alert("تم تسجيل الدخول ✔");
-}
-
-/* لوحة المسؤول */
-function openAdmin(){
-
-let pass=prompt("ادخل الرمز السري");
-
-if(pass===ADMIN_PASSWORD){
-admin.classList.remove("hidden");
-load();
-}else{
-alert("❌ رمز خاطئ");
-}
-
-}
-
-/* استرجاع */
-window.onload=()=>{
-if(localStorage.getItem("login")) logged=true;
-if(localStorage.getItem("applied")) applied=true;
-};
-
-/* اختيار */
+/* اختيار قطاع */
 function selectDept(el,name){
-if(applied) return;
-
 dept=name;
-
 document.querySelectorAll(".box").forEach(b=>b.classList.remove("active"));
 el.classList.add("active");
-
-check();
 }
-
-/* تحقق ذكي */
-function check(){
-
-let valid=true;
-
-let fields=["name","age","discord","gameId","exp","hours"];
-
-fields.forEach(id=>{
-let el=document.getElementById(id);
-if(!el.value.trim()){
-el.classList.add("error");
-valid=false;
-}else{
-el.classList.remove("error");
-}
-});
-
-if(!dept) valid=false;
-
-sendBtn.disabled=!valid;
-}
-
-/* مراقبة */
-document.querySelectorAll("input,textarea").forEach(i=>{
-i.addEventListener("input",check);
-});
 
 /* إرسال */
 function send(){
 
-if(!logged){
-alert("سجل دخول أول");
-return;
-}
-
 if(applied){
-alert("قدمت مسبقاً ❌");
+alert("❌ قدمت مسبقاً");
 return;
 }
 
@@ -230,62 +144,90 @@ let data={
 name:name.value,
 age:age.value,
 discord:discord.value,
-gameId:gameId.value,
+game:game.value,
 exp:exp.value,
 hours:hours.value,
 dept:dept,
 status:"pending"
 };
 
-let apps=JSON.parse(localStorage.getItem("apps")||"[]");
-apps.push(data);
-localStorage.setItem("apps",JSON.stringify(apps));
+if(!data.name || !data.age || !data.discord || !data.game || !data.exp || !data.hours || !dept){
+alert("عبي كل البيانات + اختر قطاع");
+return;
+}
+
+let arr=JSON.parse(localStorage.getItem("apps")||"[]");
+arr.push(data);
+localStorage.setItem("apps",JSON.stringify(arr));
 
 applied=true;
-localStorage.setItem("applied","1");
 
 msg.innerText="✔ تم إرسال الطلب بنجاح";
-
-sendBtn.disabled=true;
-
 }
 
 /* لوحة المسؤول */
-function load(){
+function openAdmin(){
 
-let apps=JSON.parse(localStorage.getItem("apps")||"[]");
+let pass=prompt("ادخل الباسورد");
+
+if(pass!="0008"){
+alert("❌ خطأ");
+return;
+}
+
+loadAdmin();
+document.getElementById("adminPanel").classList.remove("hidden");
+
+}
+
+/* عرض الطلبات */
+function loadAdmin(){
+
+let arr=JSON.parse(localStorage.getItem("apps")||"[]");
 
 let html="";
 
-apps.forEach((a,i)=>{
+arr.forEach((a,i)=>{
 
 html+=`
 <div class="card">
-<p>👤 ${a.name}</p>
-<p>🏛️ ${a.dept}</p>
-<p>📊 ${a.status}</p>
+<p>👤 الاسم: ${a.name}</p>
+<p>🎂 العمر: ${a.age}</p>
+<p>🎮 Game ID: ${a.game}</p>
+<p>💬 Discord: ${a.discord}</p>
+<p>🏛️ القطاع: ${a.dept}</p>
+<p>📊 الحالة: ${a.status}</p>
 
 <button onclick="accept(${i})">✔ قبول</button>
 <button onclick="reject(${i})">✖ رفض</button>
+<button onclick="copyDiscord('${a.discord}')">💬 نسخ ديسكورد</button>
 </div>
 `;
 });
 
-list.innerHTML=html;
+document.getElementById("adminPanel").innerHTML=html;
 }
 
+/* قبول */
 function accept(i){
-let apps=JSON.parse(localStorage.getItem("apps"));
-apps[i].status="accepted";
-localStorage.setItem("apps",JSON.stringify(apps));
-load();
+let arr=JSON.parse(localStorage.getItem("apps"));
+arr[i].status="accepted";
+localStorage.setItem("apps",JSON.stringify(arr));
+loadAdmin();
 }
 
+/* رفض */
 function reject(i){
-let apps=JSON.parse(localStorage.getItem("apps"));
-apps[i].status="rejected";
-localStorage.setItem("apps",JSON.stringify(apps));
-load();
+let arr=JSON.parse(localStorage.getItem("apps"));
+arr[i].status="rejected";
+localStorage.setItem("apps",JSON.stringify(arr));
+loadAdmin();
+}
+
+/* نسخ ديسكورد */
+function copyDiscord(id){
+navigator.clipboard.writeText(id);
+alert("تم نسخ Discord ID");
 }
 
 </script>
