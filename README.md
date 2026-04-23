@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>AlBadaa RP - التقديم</title>
+<title>AlBadaa RP - التوظيف</title>
 
 <style>
+
 *{box-sizing:border-box;}
 
 body{
@@ -14,14 +15,6 @@ margin:0;
 font-family:tahoma;
 background:#0f1116;
 color:white;
-}
-
-/* إصلاح النقر للبيسي */
-body::before{
-content:"";
-position:fixed;
-inset:0;
-z-index:-1;
 }
 
 header{
@@ -36,8 +29,6 @@ border-bottom:2px solid #6d28d9;
 max-width:900px;
 margin:auto;
 padding:15px;
-position:relative;
-z-index:2;
 }
 
 .card{
@@ -46,8 +37,6 @@ padding:15px;
 margin:10px 0;
 border-radius:10px;
 border:1px solid #22283a;
-position:relative;
-z-index:3;
 }
 
 button{
@@ -60,8 +49,6 @@ background:#5b21b6;
 color:white;
 font-weight:bold;
 cursor:pointer;
-position:relative;
-z-index:4;
 }
 
 button:disabled{
@@ -93,7 +80,6 @@ text-align:center;
 cursor:pointer;
 border:1px solid #2a3145;
 transition:0.2s;
-user-select:none;
 }
 
 .box.active{
@@ -101,7 +87,7 @@ background:#6d28d9;
 }
 
 .hidden{display:none;}
-.small{font-size:12px;opacity:0.7;}
+
 </style>
 </head>
 
@@ -109,13 +95,14 @@ background:#6d28d9;
 
 <header>
 🏛️ AlBadaa RP - التوظيف
-<div class="small">👑 المسؤول: RV</div>
+<div style="font-size:12px;">👑 المسؤول: RV</div>
 </header>
 
 <div class="container">
 
 <div class="card">
-<button onclick="openAdmin()">🔐 لوحة المسؤول</button>
+<button onclick="login()">تسجيل دخول</button>
+<button onclick="openAdmin()">لوحة المسؤول</button>
 </div>
 
 <div class="card">
@@ -139,13 +126,13 @@ background:#6d28d9;
 <textarea id="exp" placeholder="الخبرات"></textarea>
 <input id="hours" placeholder="ساعات التواجد">
 
-<button id="sendBtn" disabled>إرسال الطلب</button>
+<button id="sendBtn" onclick="send()" disabled>إرسال الطلب</button>
 
 <p id="msg"></p>
 
 </div>
 
-<div class="card hidden" id="adminPanel">
+<div class="card hidden" id="admin">
 <h3>👑 لوحة المسؤول</h3>
 <div id="list"></div>
 </div>
@@ -154,24 +141,40 @@ background:#6d28d9;
 
 <script>
 
-/* 🔐 رمز المسؤول */
-const ADMIN_PASSWORD = "123456"; // غيره لو تبي
+const ADMIN_PASSWORD = "123456"; // 🔐 غيره
 
 let dept="";
+let logged=false;
 let applied=false;
 
-/* فتح لوحة المسؤول */
+/* تسجيل */
+function login(){
+logged=true;
+localStorage.setItem("login","1");
+alert("تم تسجيل الدخول ✔");
+}
+
+/* لوحة المسؤول */
 function openAdmin(){
+
 let pass=prompt("ادخل الرمز السري");
+
 if(pass===ADMIN_PASSWORD){
-document.getElementById("adminPanel").classList.remove("hidden");
+admin.classList.remove("hidden");
 load();
 }else{
 alert("❌ رمز خاطئ");
 }
+
 }
 
-/* اختيار قطاع */
+/* استرجاع */
+window.onload=()=>{
+if(localStorage.getItem("login")) logged=true;
+if(localStorage.getItem("applied")) applied=true;
+};
+
+/* اختيار */
 function selectDept(el,name){
 if(applied) return;
 
@@ -188,7 +191,9 @@ function check(){
 
 let valid=true;
 
-["name","age","discord","gameId","exp","hours"].forEach(id=>{
+let fields=["name","age","discord","gameId","exp","hours"];
+
+fields.forEach(id=>{
 let el=document.getElementById(id);
 if(!el.value.trim()){
 el.classList.add("error");
@@ -200,16 +205,21 @@ el.classList.remove("error");
 
 if(!dept) valid=false;
 
-document.getElementById("sendBtn").disabled=!valid;
+sendBtn.disabled=!valid;
 }
 
 /* مراقبة */
-document.querySelectorAll("input,textarea").forEach(el=>{
-el.addEventListener("input",check);
+document.querySelectorAll("input,textarea").forEach(i=>{
+i.addEventListener("input",check);
 });
 
 /* إرسال */
-document.getElementById("sendBtn").onclick=function(){
+function send(){
+
+if(!logged){
+alert("سجل دخول أول");
+return;
+}
 
 if(applied){
 alert("قدمت مسبقاً ❌");
@@ -236,18 +246,9 @@ localStorage.setItem("applied","1");
 
 msg.innerText="✔ تم إرسال الطلب بنجاح";
 
-this.disabled=true;
+sendBtn.disabled=true;
 
-load();
-};
-
-/* استرجاع */
-window.onload=()=>{
-if(localStorage.getItem("applied")){
-applied=true;
-msg.innerText="لقد قدمت مسبقاً";
 }
-};
 
 /* لوحة المسؤول */
 function load(){
@@ -270,7 +271,7 @@ html+=`
 `;
 });
 
-document.getElementById("list").innerHTML=html;
+list.innerHTML=html;
 }
 
 function accept(i){
